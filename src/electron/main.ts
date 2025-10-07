@@ -4,10 +4,16 @@ import { isDev } from "./util.js";
 import { getPreloadPath } from "./pathResolver.js";
 import { notifyAllWindows, registerHandlers } from "./handlers.js";
 
-app.on("ready", () => {
+app.on("ready", async () => {
+  registerHandlers();
+
   const mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
     webPreferences: {
       preload: getPreloadPath(),
+      nodeIntegration: false,
+      contextIsolation: true,
     },
   });
   if (isDev()) {
@@ -17,8 +23,6 @@ app.on("ready", () => {
     mainWindow.loadFile(path.join(app.getAppPath(), "/dist-react/index.html"));
   }
 });
-
-registerHandlers();
 
 // const notificationInterval = setInterval(() => {
 //   console.log("broadcasting a notification");

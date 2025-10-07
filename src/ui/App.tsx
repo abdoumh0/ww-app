@@ -1,65 +1,87 @@
-import reactLogo from "./assets/react.svg";
-import "./App.css";
-import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DollarSign, ShoppingCart, Package } from "lucide-react";
+import { Link } from "react-router";
 
-function App() {
-  const [notifications, setNotifications] = useState<
-    {
-      message: string;
-      title: string;
-      type: string;
-    }[]
-  >([]);
-
-  useEffect(() => {
-    const unsub = window.electronAPI.on("notification:new", (data) => {
-      console.log(data);
-      setNotifications((prev) => {
-        return [...prev, data];
-      });
-    });
-
-    return unsub;
-  }, []);
-
+export default function DashboardPage() {
   return (
-    <>
-      <div>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button
-          onClick={async () => {
-            const s = await window.electronAPI.invoke("purchase:create", {
-              name: "first",
-              items: [],
-            });
+    <div className="p-6 space-y-6">
+      <h1 className="text-3xl font-bold">Welcome to POS Dashboard</h1>
 
-            console.log(s);
-          }}
-        >
-          Invoke
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Today's Sales</CardTitle>
+            <DollarSign className="text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">$1,240.00</p>
+            <p className="text-sm text-muted-foreground">+12% from yesterday</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Orders</CardTitle>
+            <ShoppingCart className="text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">36</p>
+            <p className="text-sm text-muted-foreground">+5 new today</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Products</CardTitle>
+            <Package className="text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">120</p>
+            <p className="text-sm text-muted-foreground">4 low in stock</p>
+          </CardContent>
+        </Card>
       </div>
-      {notifications.map((notification, index) => {
-        return (
-          <div key={index}>
-            <div>{notification.title}</div>
-            <div>{notification.message}</div>
-          </div>
-        );
-      })}
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+        <Link to="/sales">
+          <Card className="hover:bg-muted transition-colors cursor-pointer">
+            <CardHeader>
+              <CardTitle>Sales</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                View and manage sales
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link to="/products">
+          <Card className="hover:bg-muted transition-colors cursor-pointer">
+            <CardHeader>
+              <CardTitle>Products</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Add and edit products
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link to="/settings">
+          <Card className="hover:bg-muted transition-colors cursor-pointer">
+            <CardHeader>
+              <CardTitle>Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Manage preferences
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+    </div>
   );
 }
-
-export default App;
