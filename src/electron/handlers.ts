@@ -5,6 +5,7 @@ import type {
   EventChannelName,
   EventChannels,
 } from "./api-contract.js";
+import { Purchase } from "./database.js";
 
 type Handler<K extends ChannelName> = (
   event: IpcMainInvokeEvent,
@@ -23,9 +24,16 @@ const handlers: {
   [K in ChannelName]: Handler<K>;
 } = {
   "purchase:create": async (event, data) => {
-    console.log("creating purchase");
-    console.log(data);
-    return { ...data, success: true };
+    try {
+      const p = await Purchase.create({
+        name: data.name,
+        items: data.items.join(", "),
+      });
+      console.log("commited:", p);
+      return { ...data, success: true };
+    } catch (error) {
+      return { ...data, success: true };
+    }
   },
 };
 

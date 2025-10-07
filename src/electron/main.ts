@@ -2,9 +2,24 @@ import { app, BrowserWindow } from "electron";
 import path from "path";
 import { isDev } from "./util.js";
 import { getPreloadPath } from "./pathResolver.js";
-import { notifyAllWindows, registerHandlers } from "./handlers.js";
+import { registerHandlers } from "./handlers.js";
+import { closeDatabase, initDatabase, syncDatabase } from "./database.js";
+import log from "electron-log";
+
+log.transports.file.level = "info";
+log.transports.console.level = "debug";
 
 app.on("ready", async () => {
+  try {
+    initDatabase();
+    await syncDatabase();
+    log.info("Database ready");
+  } catch (error) {
+    log.error("Failed to initialize database:", error);
+    app.quit();
+    return;
+  }
+
   registerHandlers();
 
   const mainWindow = new BrowserWindow({
@@ -39,6 +54,11 @@ app.on("ready", async () => {
 //     clearInterval(notificationInterval);
 //   }
 // });
+
+app.on("before-quit", async () => {
+  log.info("Closing database...");
+  await closeDatabase();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

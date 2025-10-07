@@ -1,5 +1,5 @@
 import { Outlet } from "react-router";
-import { ModeToggle } from "./routes/pos/ThemeChange";
+import { ModeToggle } from "./components/ThemeChange";
 import { SidebarTrigger } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
 
