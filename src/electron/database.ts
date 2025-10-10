@@ -12,9 +12,23 @@ export interface PurchaseAttributes {
   items: string;
 }
 
+export interface ItemAttributes {
+  id?: number;
+  code: number;
+  name: string;
+  price: number;
+  variant?: string;
+  type?: string;
+  imagePath?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export type PurchaseModel = ModelStatic<Model<PurchaseAttributes>>;
+export type ItemModel = ModelStatic<Model<ItemAttributes>>;
 
 export let Purchase: PurchaseModel;
+export let Item: ItemModel;
 
 function getDatabasePath(): string {
   const isDev = !app.isPackaged;
@@ -65,6 +79,39 @@ export function initDatabase(): Sequelize {
       timestamps: true,
     }
   ) as PurchaseModel;
+
+  Item = sequelize.define(
+    "item",
+    {
+      id: {
+        type: DataTypes.BIGINT,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      code: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      price: {
+        type: DataTypes.BIGINT,
+        allowNull: false,
+      },
+      imagePath: {
+        type: DataTypes.STRING,
+      },
+      type: {
+        type: DataTypes.STRING,
+      },
+      variant: {
+        type: DataTypes.STRING,
+      },
+    },
+    { timestamps: true }
+  );
 
   // Define relationships
   //   User.hasMany(Note, { foreignKey: "userId", as: "notes" });

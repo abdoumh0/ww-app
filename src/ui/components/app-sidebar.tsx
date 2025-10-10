@@ -1,4 +1,4 @@
-import { ArrowLeft, HandCoins, Home, Settings, X } from "lucide-react";
+import { ArrowLeft, HandCoins, Home, Package, Settings, X } from "lucide-react";
 
 import {
   Sidebar,
@@ -30,6 +30,11 @@ const items: {
     title: "Point Of Sale",
     url: "/pos",
     icon: <HandCoins />,
+  },
+  {
+    title: "Inventory",
+    url: "/inventory",
+    icon: <Package />,
   },
 ];
 

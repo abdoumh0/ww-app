@@ -1,7 +1,18 @@
 import electron from "electron";
 import { ChannelName, EventChannelName, InvokeFn, OnFn } from "./api-contract";
 
-const ALLOWED_CHANNELS: ChannelName[] = ["purchase:create"];
+const ALLOWED_CHANNELS: ChannelName[] = [
+  "purchase:create",
+  "item:create",
+  "item:list",
+  "item:get",
+  "item:update",
+  "item:delete",
+  // "image:save",
+  // "image:get",
+  // "image:delete",
+  // "image:list",
+];
 
 const ALLOWED_EVENT_CHANNELS: EventChannelName[] = ["notification:new"];
 

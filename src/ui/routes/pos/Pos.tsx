@@ -3,10 +3,10 @@ import Calc from "./Calc";
 
 type Props = {};
 
-export default function Pos({}: Props) {
+export default function POS({}: Props) {
   return (
     <div>
-      <Button
+      {/* <Button
         onClick={async () => {
           const data = { name: "test purchase", items: ["banana", "water"] };
           console.log('invoking "purchase:create" with values: ', data);
@@ -19,8 +19,8 @@ export default function Pos({}: Props) {
         }}
       >
         Invoke
-      </Button>
-      <Calc total={0} />
+      </Button> */}
+      <Calc />
     </div>
   );
 }
