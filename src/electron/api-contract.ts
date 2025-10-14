@@ -1,3 +1,5 @@
+import { ItemAttributes } from "./database.js";
+
 export interface APIChannels {
   "purchase:create": {
     input: { name: string; items: string[] };
@@ -5,71 +7,29 @@ export interface APIChannels {
   };
   "item:create": {
     input: {
-      code: number;
+      code: string;
       name: string;
       price: number;
       imagePath?: string;
       type?: string;
       variant?: string;
     };
-    output: {
-      id: string;
-      code: number;
-      name: string;
-      price: number;
-      imagePath?: string;
-      type?: string;
-      variant?: string;
-      createdAt: string;
-    };
+    output: ItemAttributes;
   };
 
   "item:list": {
-    input: void;
-    output: Array<{
-      id: string;
-      code: number;
-      name: string;
-      price: number;
-      imagePath?: string;
-      type?: string;
-      variant?: string;
-    }>;
+    input: { skip: number; perPage: number };
+    output: Array<ItemAttributes>;
   };
 
-  "item:get": {
-    input: { id: string };
-    output: {
-      id: string;
-      code: number;
-      name: string;
-      price: number;
-      imagePath?: string;
-      type?: string;
-      variant?: string;
-    } | null;
+  "item:get_by_code": {
+    input: { code: string };
+    output: ItemAttributes | null;
   };
 
   "item:update": {
-    input: {
-      id: string;
-      code?: number;
-      name?: string;
-      price?: number;
-      imagePath?: string;
-      type?: string;
-      variant?: string;
-    };
-    output: {
-      id: string;
-      code: number;
-      name: string;
-      price: number;
-      imagePath?: string;
-      type?: string;
-      variant?: string;
-      updatedAt: string;
-    };
+    input: ItemAttributes;
+    output: ItemAttributes;
   };
 
   "item:delete": {

@@ -14,7 +14,7 @@ export interface PurchaseAttributes {
 
 export interface ItemAttributes {
   id?: number;
-  code: number;
+  code: string;
   name: string;
   price: number;
   variant?: string;

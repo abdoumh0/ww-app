@@ -1,4 +1,12 @@
-import { ArrowLeft, HandCoins, Home, Package, Settings, X } from "lucide-react";
+import {
+  ArrowLeft,
+  HandCoins,
+  Home,
+  Package,
+  Router,
+  Settings,
+  X,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -35,6 +43,11 @@ const items: {
     title: "Inventory",
     url: "/inventory",
     icon: <Package />,
+  },
+  {
+    title: "Auth",
+    url: "/auth",
+    icon: <Router />,
   },
 ];
 

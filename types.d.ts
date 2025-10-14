@@ -6,6 +6,9 @@ declare global {
       invoke: InvokeFn;
       on: OnFn;
     };
+    env: {
+      WEBAPP_DOMAIN: string;
+    };
   }
 }
 

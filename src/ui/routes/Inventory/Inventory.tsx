@@ -1,86 +1,48 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, Edit2, Plus } from "lucide-react";
-
-interface Item {
-  id: string;
-  code: number;
-  name: string;
-  price: number;
-  imagePath?: string;
-  type?: string;
-  variant?: string;
-}
+import { Trash2, Edit2, Plus, Barcode } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import type { ItemAttributes } from "../../../electron/database";
 
 interface ItemFormProps {
-  item?: Item;
-  onSave: (formData: Omit<Item, "id">) => void;
+  item?: ItemAttributes;
+  onSave: (formData: Omit<ItemAttributes, "id">) => void;
   onCancel: () => void;
 }
 
 interface ItemCardProps {
-  item: Item;
-  onEdit: (item: Item) => void;
+  item: ItemAttributes;
+  onEdit: (item: ItemAttributes) => void;
   onDelete: (id: string) => void;
 }
 
 interface ItemsListProps {
-  items: Item[];
-  onEdit: (item: Item) => void;
+  items: ItemAttributes[];
+  onEdit: (item: ItemAttributes) => void;
   onDelete: (id: string) => void;
 }
 
 interface InventoryPageState {
-  items: Item[];
-  editingItem: Item | null;
+  items: ItemAttributes[];
+  editingItem: ItemAttributes | null;
   showForm: boolean;
 }
 
-const mockItems: Item[] = [
-  {
-    id: "1",
-    code: 101,
-    name: "Wireless Headphones",
-    price: 8999,
-    type: "Electronics",
-    variant: "Black",
-  },
-  {
-    id: "2",
-    code: 102,
-    name: "USB-C Cable",
-    price: 1299,
-    type: "Accessories",
-    variant: "White",
-  },
-  {
-    id: "3",
-    code: 103,
-    name: "Laptop Stand",
-    price: 2499,
-    type: "Office",
-  },
-  {
-    id: "4",
-    code: 104,
-    name: "Mechanical Keyboard",
-    price: 5999,
-    type: "Electronics",
-    variant: "Red Switches",
-  },
-  {
-    id: "5",
-    code: 105,
-    name: "Monitor Arm",
-    price: 3499,
-    type: "Office",
-  },
-];
-
 function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
-  const [code, setCode] = useState(item?.code?.toString() || "");
+  const [code, setCode] = useState(item?.code);
   const [name, setName] = useState(item?.name || "");
   const [price, setPrice] = useState(item?.price?.toString() || "");
   const [type, setType] = useState(item?.type || "");
@@ -88,32 +50,40 @@ function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
 
   const handleSubmit = (): void => {
     if (!code || !name || !price) {
-      alert("Please fill in all required fields");
+      toast("Please fill in all required fields", { duration: 3500 });
       return;
     }
 
-    const formData: Omit<Item, "id"> = {
-      code: parseInt(code),
+    const formData: Omit<ItemAttributes, "id"> = {
+      code,
       name,
       price: parseInt(price),
       type: type || undefined,
       variant: variant || undefined,
     };
     onSave(formData);
+    setCode("");
+    setName("");
+    setPrice("");
+    setType("");
+    setVariant("");
   };
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
+          <label className="flex items-center text-sm font-medium text-foreground mb-1">
             Code <span className="text-red-500">*</span>
+            &nbsp;&nbsp;
+            <Barcode size={16} />
           </label>
           <Input
             type="number"
             onChange={(e) => setCode(e.target.value)}
-            placeholder="e.g., 101"
+            placeholder="select and scan your item's barcode"
             className="border-input"
+            defaultValue={code}
           />
         </div>
 
@@ -125,7 +95,7 @@ function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
             type="number"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            placeholder="e.g., 5999"
+            placeholder="DZD"
             className="border-input"
           />
         </div>
@@ -235,15 +205,36 @@ function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
               <Edit2 className="w-4 h-4 mr-1" />
               Edit
             </Button>
-            <Button
-              onClick={() => onDelete(item.id)}
-              size="sm"
-              variant="outline"
-              className="border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10 dark:hover:bg-red-500/20"
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              Delete
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant={"destructive"} size={"sm"}>
+                  <Trash2 />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    this item.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction asChild>
+                    <Button
+                      variant={"destructive"}
+                      // @ts-ignore // maybe can cause errors but not likely
+                      onClick={() => onDelete(item.id?.toString())}
+                      className="text-foreground"
+                    >
+                      Delete
+                    </Button>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </CardContent>
@@ -276,35 +267,41 @@ function ItemsList({ items, onEdit, onDelete }: ItemsListProps) {
 
 function InventoryPage() {
   const [state, setState] = useState<InventoryPageState>({
-    items: mockItems,
+    items: [],
     editingItem: null,
     showForm: false,
   });
 
-  const handleSave = (formData: Omit<Item, "id">): void => {
-    if (state.editingItem) {
-      setState((prev) => ({
-        ...prev,
-        items: prev.items.map((item) =>
-          item.id === prev.editingItem?.id ? { ...item, ...formData } : item
-        ),
-        editingItem: null,
-        showForm: false,
-      }));
-    } else {
-      const newItem: Item = {
-        id: Date.now().toString(),
-        ...formData,
-      };
-      setState((prev) => ({
-        ...prev,
-        items: [newItem, ...prev.items],
-        showForm: false,
-      }));
-    }
+  const loadItems = async (
+    skip: number = 0,
+    perPage: number = 20
+  ): Promise<void> => {
+    const items = await window.electronAPI.invoke("item:list", {
+      skip,
+      perPage,
+    });
+
+    setState((prev) => {
+      return { ...prev, items: items };
+    });
   };
 
-  const handleEdit = (item: Item): void => {
+  const handleSave = async (
+    formData: Omit<ItemAttributes, "id">
+  ): Promise<void> => {
+    if (state.editingItem) {
+      await window.electronAPI.invoke("item:update", {
+        id: state.editingItem.id,
+        ...formData,
+      });
+    } else {
+      await window.electronAPI.invoke("item:create", formData);
+    }
+
+    loadItems();
+  };
+
+  const handleEdit = (item: ItemAttributes): void => {
     setState((prev) => ({
       ...prev,
       editingItem: item,
@@ -312,13 +309,9 @@ function InventoryPage() {
     }));
   };
 
-  const handleDelete = (id: string): void => {
-    if (confirm("Are you sure you want to delete this item?")) {
-      setState((prev) => ({
-        ...prev,
-        items: prev.items.filter((item) => item.id !== id),
-      }));
-    }
+  const handleDelete = async (id: string): Promise<void> => {
+    await window.electronAPI.invoke("item:delete", { id });
+    loadItems();
   };
 
   const handleCancel = (): void => {
@@ -328,6 +321,10 @@ function InventoryPage() {
       showForm: false,
     }));
   };
+
+  useEffect(() => {
+    loadItems();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background p-6">

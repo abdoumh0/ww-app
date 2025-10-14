@@ -5,7 +5,7 @@ const ALLOWED_CHANNELS: ChannelName[] = [
   "purchase:create",
   "item:create",
   "item:list",
-  "item:get",
+  "item:get_by_code",
   "item:update",
   "item:delete",
   // "image:save",

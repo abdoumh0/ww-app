@@ -18,9 +18,11 @@ function isOp(a: string): boolean {
 }
 
 export default function Calc({}: Props) {
-  const { total, setTotal } = useStore();
+  const { setTotal } = useStore();
   const [current, setCurrent] = useState(0);
   const [op, setOp] = useState<string>("");
+
+  const calcRef = useRef<HTMLDivElement | null>(null);
 
   const opRef = useRef(op);
   const currentRef = useRef(current);
@@ -83,21 +85,24 @@ export default function Calc({}: Props) {
       }
     };
 
-    document.addEventListener("keydown", listener);
+    calcRef.current?.addEventListener("keydown", listener);
 
     return () => {
-      document.removeEventListener("keydown", listener);
+      calcRef.current?.removeEventListener("keydown", listener);
     };
   }, []);
 
   return (
-    <div className="w-fit h-fit rounded-sm border border-border overflow-hidden">
+    <div
+      ref={calcRef}
+      tabIndex={1}
+      className="w-fit h-fit rounded-sm border border-border overflow-hidden"
+    >
       <div className="flex font-DSEG w-full overflow-x-clip text-right h-19 bg-stone-400 text-stone-900">
         <div className="w-7 h-full font-mono font-bold text-xl items-center flex justify-center align-middle">
           {op}
         </div>
         <div className="text-lg flex flex-col h-full w-full justify-evenly overflow-x-hidden">
-          <div>{total}</div>
           <div>{current > 0 ? current : ""}</div>
         </div>
       </div>
@@ -113,6 +118,15 @@ export default function Calc({}: Props) {
                     className={`${
                       cell == "=" ? "bg-amber-700" : ""
                     } w-16 h-19 rounded-none border border-border`}
+                    onMouseDown={() => {
+                      document.dispatchEvent(
+                        new KeyboardEvent("keydown", {
+                          key: cell,
+                          bubbles: true,
+                          cancelable: true,
+                        })
+                      );
+                    }}
                   >
                     {cell}
                   </Button>

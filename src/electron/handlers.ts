@@ -46,18 +46,7 @@ const handlers: {
         variant: data.variant || undefined,
       });
 
-      const itemData = item.dataValues;
-
-      return {
-        id: itemData.id!.toString(),
-        code: itemData.code,
-        name: itemData.name,
-        price: itemData.price,
-        imagePath: itemData.imagePath || undefined,
-        type: itemData.type || undefined,
-        variant: itemData.variant || undefined,
-        createdAt: itemData.createdAt!.toISOString(),
-      };
+      return item.dataValues;
     } catch (error) {
       console.error("Failed to create item:", error);
       throw error;
@@ -69,57 +58,42 @@ const handlers: {
       const items = (
         await Item.findAll({
           order: [["createdAt", "DESC"]],
+          limit: data.perPage,
+          offset: data.skip,
         })
       ).map((v) => v.dataValues);
 
-      return items.map((item) => ({
-        id: item.id!.toString(),
-        code: item.code,
-        name: item.name,
-        price: item.price,
-        imagePath: item.imagePath || undefined,
-        type: item.type || undefined,
-        variant: item.variant || undefined,
-      }));
+      return items;
     } catch (error) {
       console.error("Failed to list items:", error);
       throw error;
     }
   },
 
-  "item:get": async (event, data) => {
+  "item:get_by_code": async (event, data) => {
     try {
-      const item = (await Item.findByPk(parseInt(data.id), { raw: true }))
+      const item = (await Item.findOne({ where: { code: data.code } }))
         ?.dataValues;
 
       if (!item) {
         return null;
       }
 
-      return {
-        id: item.id!.toString(),
-        code: item.code,
-        name: item.name,
-        price: item.price,
-        imagePath: item.imagePath || undefined,
-        type: item.type || undefined,
-        variant: item.variant || undefined,
-      };
+      return item;
     } catch (error) {
-      console.error("❌ Failed to get item:", error);
+      console.error("Failed to get item:", error);
       throw error;
     }
   },
 
   "item:update": async (event, data) => {
     try {
-      const item = await Item.findByPk(parseInt(data.id));
+      const item = await Item.findByPk(data.id);
 
       if (!item) {
         throw new Error("Item not found");
       }
 
-      // Update only provided fields
       if (data.code !== undefined) item.set("code", data.code);
       if (data.name !== undefined) item.set("name", data.name);
       if (data.price !== undefined) item.set("price", data.price);
@@ -129,18 +103,7 @@ const handlers: {
 
       await item.save();
 
-      const itemData = item.dataValues;
-
-      return {
-        id: itemData.id!.toString(),
-        code: itemData.code,
-        name: itemData.name,
-        price: itemData.price,
-        imagePath: itemData.imagePath || undefined,
-        type: itemData.type || undefined,
-        variant: itemData.variant || undefined,
-        updatedAt: itemData.updatedAt!.toISOString(),
-      };
+      return item.dataValues;
     } catch (error) {
       console.error("Failed to update item:", error);
       throw error;

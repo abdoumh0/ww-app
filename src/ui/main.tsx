@@ -10,6 +10,7 @@ import { SidebarProvider } from "./components/ui/sidebar.tsx";
 import StoreProvider from "./lib/StoreContext.tsx";
 import "@fontsource/dseg7-classic/700.css";
 import Inventory from "./routes/Inventory/Inventory.tsx";
+import Auth from "./routes/Auth/auth.tsx";
 
 export default App;
 
@@ -24,6 +25,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route index element={<App />} />
                 <Route path="pos" element={<POS />} />
                 <Route path="inventory" element={<Inventory />} />
+                <Route path="auth" element={<Auth />} />
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
