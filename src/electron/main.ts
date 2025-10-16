@@ -5,6 +5,7 @@ import { getPreloadPath } from "./pathResolver.js";
 import { registerHandlers } from "./handlers.js";
 import { closeDatabase, initDatabase, syncDatabase } from "./database.js";
 import log from "electron-log";
+import { spawn } from "child_process";
 
 log.transports.file.level = "info";
 log.transports.console.level = "debug";

@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes, Model, ModelStatic } from "sequelize";
+import { Sequelize, DataTypes, Model, type ModelStatic } from "sequelize";
 import { app } from "electron";
 import path from "path";
 import fs from "fs";

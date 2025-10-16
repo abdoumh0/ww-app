@@ -1,4 +1,4 @@
-import { ItemAttributes } from "./database.js";
+import { type ItemAttributes } from "./database.js";
 
 export interface APIChannels {
   "purchase:create": {

@@ -1,5 +1,5 @@
-import type { Item } from "@/routes/POS/POS";
 import React, { createContext, useContext, useReducer, useState } from "react";
+import type { ItemAttributes } from "../../electron/database";
 
 type Props = {
   children?: React.ReactNode;
@@ -9,14 +9,14 @@ type StoreContextType = {
   total: number;
   setTotal: React.Dispatch<React.SetStateAction<number>>;
   scannedItems: {
-    item: Item;
+    item: ItemAttributes;
     qty: number;
   }[];
   scannedItemsDispatch: React.ActionDispatch<
     [
       action: {
         type: scannedItemsActions;
-        payload: Item;
+        payload: ItemAttributes;
       }
     ]
   >;
@@ -26,8 +26,8 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 type scannedItemsActions = "ADD" | "REMOVE";
 function scannedItemsReducer(
-  state: { item: Item; qty: number }[],
-  action: { type: scannedItemsActions; payload: Item }
+  state: { item: ItemAttributes; qty: number }[],
+  action: { type: scannedItemsActions; payload: ItemAttributes }
 ) {
   switch (action.type) {
     case "ADD":

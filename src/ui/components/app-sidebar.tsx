@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   HandCoins,
   Home,
+  LogOut as LogOutIcon,
   Package,
   Router,
   Settings,
@@ -23,6 +24,8 @@ import {
 import { Button } from "./ui/button";
 import { NavLink } from "react-router";
 import { useLayoutEffect } from "react";
+import { useSession } from "@/lib/SessionContext";
+import { LogOut } from "@/lib/utils";
 
 const items: {
   title: string;
@@ -44,15 +47,13 @@ const items: {
     url: "/inventory",
     icon: <Package />,
   },
-  {
-    title: "Auth",
-    url: "/auth",
-    icon: <Router />,
-  },
 ];
+
+const authItems = [];
 
 export function AppSidebar() {
   const { toggleSidebar, setOpen } = useSidebar();
+  const { session, refreshSession } = useSession();
 
   useLayoutEffect(() => {
     setOpen(false);
@@ -95,6 +96,23 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {session ? null : (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={"/auth"}>
+                      {({ isActive }) => (
+                        <span className="flex items-center w-full gap-1">
+                          <Router />
+                          <span>Auth</span>
+                          {isActive ? (
+                            <ArrowLeft size={16} className="ml-auto" />
+                          ) : null}
+                        </span>
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -109,6 +127,24 @@ export function AppSidebar() {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          {session && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Button
+                  className="flex"
+                  onClick={async () => {
+                    console.log("first");
+                    await LogOut();
+                    refreshSession();
+                  }}
+                  variant="destructive"
+                >
+                  <LogOutIcon />
+                  <span>Log Out</span>
+                </Button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
