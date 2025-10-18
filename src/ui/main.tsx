@@ -12,6 +12,8 @@ import "@fontsource/dseg7-classic/700.css";
 import Inventory from "./routes/Inventory/Inventory.tsx";
 import AuthPage from "./routes/Auth/AuthPage.tsx";
 import { SessionProvider } from "./lib/SessionContext.tsx";
+import { WebSocketProvider } from "./lib/WebsocketContext.tsx";
+import MessageProvider from "./lib/MessageContext.tsx";
 
 export default App;
 
@@ -20,20 +22,24 @@ createRoot(document.getElementById("root")!).render(
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <SessionProvider>
         <StoreProvider>
-          <SidebarProvider>
-            <HashRouter>
-              <Routes>
-                <Route element={<Layout />}>
-                  <Route index element={<App />} />
-                  <Route path="pos" element={<POS />} />
-                  <Route path="inventory" element={<Inventory />} />
-                  <Route path="auth" element={<AuthPage />} />
+          <MessageProvider>
+            <WebSocketProvider>
+              <SidebarProvider>
+                <HashRouter>
+                  <Routes>
+                    <Route element={<Layout />}>
+                      <Route index element={<App />} />
+                      <Route path="pos" element={<POS />} />
+                      <Route path="inventory" element={<Inventory />} />
+                      <Route path="auth" element={<AuthPage />} />
 
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Route>
-              </Routes>
-            </HashRouter>
-          </SidebarProvider>
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Route>
+                  </Routes>
+                </HashRouter>
+              </SidebarProvider>
+            </WebSocketProvider>
+          </MessageProvider>
         </StoreProvider>
       </SessionProvider>
     </ThemeProvider>

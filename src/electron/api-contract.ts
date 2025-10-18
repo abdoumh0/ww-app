@@ -1,9 +1,13 @@
-import { type ItemAttributes } from "./database.js";
+import { type PurchaseAttributes, type ItemAttributes } from "./database.js";
 
 export interface APIChannels {
   "purchase:create": {
-    input: { name: string; items: string[] };
-    output: { success: boolean; name: string; items: string[] };
+    input: { attributes: ItemAttributes; qty: number }[];
+    output: PurchaseAttributes | null;
+  };
+  "purchase:get": {
+    input: { get: number; skip: number };
+    output: PurchaseAttributes[];
   };
   "item:create": {
     input: {
@@ -25,6 +29,11 @@ export interface APIChannels {
   "item:get_by_code": {
     input: { code: string };
     output: ItemAttributes | null;
+  };
+
+  "item:get_by_name": {
+    input: { name: string };
+    output: ItemAttributes[];
   };
 
   "item:update": {

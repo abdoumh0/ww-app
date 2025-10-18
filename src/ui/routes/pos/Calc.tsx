@@ -1,94 +1,88 @@
 import { Button } from "@/components/ui/button";
-import { useStore } from "@/lib/StoreContext";
 import { useEffect, useRef, useState } from "react";
-
+import { Parser } from "expr-eval";
+import { useStore } from "@/lib/StoreContext";
 type Props = {};
 
 const button = [
-  ["7", "8", "9", "/"],
-  ["4", "5", "6", "X"],
-  ["1", "2", "3", "-"],
-  ["0", ".", "=", "+"],
+  ["C", "(", ")", "/"],
+  ["7", "8", "9", "x"],
+  ["4", "5", "6", "-"],
+  ["1", "2", "3", "+"],
+  ["0", ".", "00", "="],
 ];
 
 function isOp(a: string): boolean {
   return (
-    a == "+" || a == "-" || a === "*" || a === "x" || a === "X" || a === "/"
+    a === "+" ||
+    a === "-" ||
+    a === "*" ||
+    a === "x" ||
+    a === "X" ||
+    a === "/" ||
+    a === "." ||
+    a === "(" ||
+    a === ")" ||
+    !isNaN(parseFloat(a))
   );
 }
 
+function toOp(a: string) {
+  if (!isOp(a)) {
+    return "";
+  }
+  if (a === "x" || a === "X") {
+    return "*";
+  }
+  return a;
+}
+
 export default function Calc({}: Props) {
-  const { setTotal } = useStore();
-  const [current, setCurrent] = useState(0);
   const [op, setOp] = useState<string>("");
+  const { scannedItemsDispatch } = useStore();
 
   const calcRef = useRef<HTMLDivElement | null>(null);
-
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const opRef = useRef(op);
-  const currentRef = useRef(current);
+
+  const listener = (e: KeyboardEvent) => {
+    if (isOp(e.key)) {
+      setOp((prev) => prev + toOp(e.key));
+    } else if (e.key === "Backspace") {
+      setOp((prev) => prev.slice(0, prev.length - 1));
+    } else if (e.key === "=" || e.key === "Enter") {
+      try {
+        const res = Parser.evaluate(opRef.current);
+        scannedItemsDispatch({
+          type: "ADD",
+          payload: { code: "", name: "<unnamed>", price: res },
+        });
+        setOp("");
+      } catch (error) {
+        setOp("err");
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+        timeoutRef.current = setTimeout(() => {
+          setOp("");
+          timeoutRef.current = null;
+        }, 1000);
+      }
+    }
+  };
 
   useEffect(() => {
     opRef.current = op;
   }, [op]);
 
   useEffect(() => {
-    currentRef.current = current;
-  }, [current]);
-
-  useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
-      console.log(e.code, e.key);
-      if (e.key === "Backspace" || e.key == "Delete") {
-        setCurrent((prev) => {
-          return Math.floor(prev / 10);
-        });
-      } else if (isOp(e.key)) {
-        if (e.key === "x" || e.key === "X") {
-          setOp("*");
-        } else {
-          setOp(e.key);
-        }
-      } else if (e.key === "=" || e.key === "Enter") {
-        console.log("first");
-        switch (opRef.current) {
-          case "+":
-            setTotal((prev) => prev + currentRef.current);
-            setCurrent(0);
-            break;
-          case "-":
-            setTotal((prev) => prev - currentRef.current);
-            setCurrent(0);
-            break;
-          case "*":
-            setTotal((prev) => prev * currentRef.current);
-            setCurrent(0);
-            break;
-          case "/":
-            if (currentRef.current == 0) {
-              break;
-            } else {
-              setTotal((prev) => prev / currentRef.current);
-              setCurrent(0);
-              break;
-            }
-
-          default:
-            console.log("default", op);
-            break;
-        }
-      }
-      const n = parseInt(e.key);
-      if (!isNaN(n)) {
-        setCurrent((prev) => {
-          return prev * 10 + n;
-        });
-      }
-    };
-
     calcRef.current?.addEventListener("keydown", listener);
 
     return () => {
       calcRef.current?.removeEventListener("keydown", listener);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
   }, []);
 
@@ -96,14 +90,14 @@ export default function Calc({}: Props) {
     <div
       ref={calcRef}
       tabIndex={1}
-      className="w-fit h-fit rounded-sm border border-border overflow-hidden"
+      className="group w-fit h-fit rounded-xs mt-1 border border-border overflow-hidden"
     >
-      <div className="flex font-DSEG w-full overflow-x-clip text-right h-19 bg-stone-400 text-stone-900">
+      <div className="flex font-DSEG w-full overflow-x-clip text-right h-17  group-focus-within:bg-stone-400 bg-stone-900 text-stone-900 transition-colors text-sm">
         <div className="w-7 h-full font-mono font-bold text-xl items-center flex justify-center align-middle">
-          {op}
+          +
         </div>
-        <div className="text-lg flex flex-col h-full w-full justify-evenly overflow-x-hidden">
-          <div>{current > 0 ? current : ""}</div>
+        <div className="text-lg flex flex-col h-full w-full justify-evenly overflow-x-hidden pr-1.5">
+          <div>{op}</div>
         </div>
       </div>
       <div className="buttons mx-auto w-fit">
@@ -117,15 +111,19 @@ export default function Calc({}: Props) {
                     variant={"secondary"}
                     className={`${
                       cell == "=" ? "bg-amber-700" : ""
-                    } w-16 h-19 rounded-none border border-border`}
+                    } w-16 h-17 rounded-none border border-border`}
                     onMouseDown={() => {
-                      document.dispatchEvent(
-                        new KeyboardEvent("keydown", {
-                          key: cell,
-                          bubbles: true,
-                          cancelable: true,
-                        })
-                      );
+                      if (isOp(cell) || cell === "=") {
+                        calcRef.current?.dispatchEvent(
+                          new KeyboardEvent("keydown", {
+                            key: cell,
+                            bubbles: true,
+                            cancelable: true,
+                          })
+                        );
+                      } else if (cell === "C") {
+                        setOp("");
+                      }
                     }}
                   >
                     {cell}

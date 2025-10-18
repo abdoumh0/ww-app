@@ -6,6 +6,7 @@ import type {
   EventChannels,
 } from "./api-contract.js";
 import { Item, ItemModel, Purchase } from "./database.js";
+import { Op } from "sequelize";
 
 type Handler<K extends ChannelName> = (
   event: IpcMainInvokeEvent,
@@ -25,15 +26,25 @@ const handlers: {
 } = {
   "purchase:create": async (event, data) => {
     try {
-      const p = await Purchase.create({
-        name: data.name,
-        items: data.items.join(", "),
-      });
-      console.log("commited:", p);
-      return { ...data, success: true };
+      const items = JSON.stringify(data);
+      const total = data.reduce((init, item) => {
+        return init + item.qty * item.attributes.price;
+      }, 0);
+      const purchase = (await Purchase.create({ items, total })).dataValues;
+      return purchase;
     } catch (error) {
-      return { ...data, success: true };
+      console.log(error);
+      return null;
     }
+  },
+  "purchase:get": async (event, data) => {
+    const history = (
+      await Purchase.findAll({
+        offset: data.skip,
+        limit: data.get,
+      })
+    ).map((purchase) => purchase.dataValues);
+    return history;
   },
   "item:create": async (event, data) => {
     try {
@@ -121,6 +132,17 @@ const handlers: {
       console.error("Failed to delete item:", error);
       throw error;
     }
+  },
+
+  "item:get_by_name": async (event, data) => {
+    const items = (
+      await Item.findAll({
+        where: {
+          name: { [Op.substring]: data.name },
+        },
+      })
+    ).map((res) => res.dataValues);
+    return items;
   },
 };
 

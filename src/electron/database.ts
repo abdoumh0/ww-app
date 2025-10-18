@@ -8,8 +8,9 @@ let sequelize: Sequelize | null = null;
 
 export interface PurchaseAttributes {
   id?: number;
-  name: string;
   items: string;
+  total: number;
+  createdAt?: Date;
 }
 
 export interface ItemAttributes {
@@ -65,17 +66,16 @@ export function initDatabase(): Sequelize {
         autoIncrement: true,
         primaryKey: true,
       },
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
       items: {
         type: DataTypes.TEXT("long"),
         allowNull: false,
       },
+      total: {
+        type: DataTypes.NUMBER,
+        allowNull: false,
+      },
     },
     {
-      tableName: "users",
       timestamps: true,
     }
   ) as PurchaseModel;

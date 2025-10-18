@@ -1,4 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/StoreContext";
+import { Barcode, Minus, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -7,6 +9,7 @@ type Props = {};
 export default function ItemList({}: Props) {
   const divRef = useRef<HTMLDivElement>(null);
   const [barcode, setBarcode] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
 
   const { scannedItems, scannedItemsDispatch } = useStore();
 
@@ -82,14 +85,74 @@ export default function ItemList({}: Props) {
     <div
       ref={divRef}
       tabIndex={0}
-      onFocus={() => console.log("focused")}
-      onBlur={() => console.log("blurred")}
-      className="focus:border border-border w-full h-full bg-accent"
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      className="focus:border border-border bg-accent flex-1 m-1"
     >
-      {scannedItems.length == 0 && <div>click here and scan items</div>}
+      {scannedItems.length == 0 && <EmptyList active={isFocused} />}
       {scannedItems.map((item) => {
-        return <div key={item.item.id}>{item.item.name}</div>;
+        return (
+          <div
+            className="bg-stone-600 m-0.5 p-2.5 rounded-sm flex justify-between"
+            key={item.attributes.id}
+          >
+            <span>{item.attributes.name}</span>
+            <span>{item.attributes.price * item.qty} DZD</span>
+            <span className="flex">
+              <span className="mr-3">qty. {item.qty}</span>
+              {item.attributes.id! >= 0 && (
+                <>
+                  <Button
+                    onClick={() => {
+                      scannedItemsDispatch({
+                        type: "ADD",
+                        payload: item.attributes,
+                      });
+                    }}
+                    className="size-6 rounded-sm mx-0.5"
+                  >
+                    <Plus size={8} />
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      scannedItemsDispatch({
+                        type: "DECREMENT",
+                        payload: item.attributes,
+                      });
+                    }}
+                    className="size-6 rounded-sm mx-0.5"
+                  >
+                    <Minus size={8} />
+                  </Button>
+                </>
+              )}
+              <Button
+                onClick={() => {
+                  scannedItemsDispatch({
+                    type: "REMOVE",
+                    payload: item.attributes,
+                  });
+                }}
+                className="size-6 rounded-sm mx-0.5"
+                variant={"destructive"}
+              >
+                <X size={4} />
+              </Button>
+            </span>
+          </div>
+        );
       })}
+    </div>
+  );
+}
+
+function EmptyList({ active }: { active?: boolean }) {
+  return (
+    <div className="opacity-10 h-full flex flex-col justify-center items-center ">
+      <span className="text-4xl">
+        {active ? "scan items" : "click here to start scannig"}
+      </span>
+      <Barcode size={40} />
     </div>
   );
 }

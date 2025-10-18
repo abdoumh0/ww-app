@@ -2,7 +2,6 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { decodeJwt } from "jose";
 import type { Session, SessionInfo } from "./SessionContext";
-import { toast } from "sonner";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -21,11 +20,12 @@ export async function getSession(): Promise<Session> {
   }
 }
 
-export async function LogOut() {
-  try {
-    await window.cookieStore.delete("session");
-  } catch (error) {
-    toast("failed to log out");
-    console.log("failed to log out", error);
+export function getOrCreateClientId(): string {
+  const key = "client_id";
+  let id = sessionStorage.getItem(key);
+  if (!id) {
+    id = crypto.randomUUID(); // Or any unique ID generator
+    sessionStorage.setItem(key, id);
   }
+  return id;
 }

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { AccountInfo } from "../../../types";
 import { getSession } from "./utils";
 import type { JWTPayload } from "jose";
+import { toast } from "sonner";
 
 export interface SessionInfo extends JWTPayload {
   user: AccountInfo;
@@ -43,3 +44,12 @@ export const useSession = () => {
     throw new Error("useSession must be used within a SessionProvider");
   return context;
 };
+
+export async function LogOut() {
+  try {
+    await window.cookieStore.delete("session");
+  } catch (error) {
+    toast("failed to log out");
+    console.log("failed to log out", error);
+  }
+}

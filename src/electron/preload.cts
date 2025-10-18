@@ -3,9 +3,11 @@ import { ChannelName, EventChannelName, InvokeFn, OnFn } from "./api-contract";
 
 const ALLOWED_CHANNELS: ChannelName[] = [
   "purchase:create",
+  "purchase:get",
   "item:create",
   "item:list",
   "item:get_by_code",
+  "item:get_by_name",
   "item:update",
   "item:delete",
   // "image:save",

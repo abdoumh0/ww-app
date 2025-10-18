@@ -1,10 +1,12 @@
 import {
   ArrowLeft,
+  AudioWaveform,
   HandCoins,
   Home,
   LogOut as LogOutIcon,
+  MailIcon,
   Package,
-  Router,
+  Search,
   Settings,
   X,
 } from "lucide-react";
@@ -24,8 +26,7 @@ import {
 import { Button } from "./ui/button";
 import { NavLink } from "react-router";
 import { useLayoutEffect } from "react";
-import { useSession } from "@/lib/SessionContext";
-import { LogOut } from "@/lib/utils";
+import { useSession, LogOut } from "@/lib/SessionContext";
 
 const items: {
   title: string;
@@ -49,7 +50,28 @@ const items: {
   },
 ];
 
-const authItems = [];
+const authItems = [
+  {
+    title: "Messages",
+    url: "/messages",
+    icon: <MailIcon />,
+  },
+  {
+    title: "Orders",
+    url: "/orders",
+    icon: <Package />,
+  },
+  {
+    title: "Browse",
+    url: "/browse",
+    icon: <Search />,
+  },
+  {
+    title: "Agent",
+    url: "/agent",
+    icon: <AudioWaveform />,
+  },
+];
 
 export function AppSidebar() {
   const { toggleSidebar, setOpen } = useSidebar();
@@ -62,8 +84,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <span className="flex justify-between pt-0.5  items-center">
-          <Button size={"sm"}>Login</Button>
+        <span className="flex justify-end pt-0.5  items-center">
           <Button
             size={"icon-sm"}
             variant={"ghost"}
@@ -96,19 +117,29 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              {session ? null : (
-                <SidebarMenuItem>
+              {session ? (
+                authItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink to={item.url}>
+                        {({ isActive }) => (
+                          <span className="flex items-center w-full gap-1">
+                            {item.icon}
+                            <span>{item.title}</span>
+                            {isActive ? (
+                              <ArrowLeft size={16} className="ml-auto" />
+                            ) : null}
+                          </span>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+              ) : (
+                <SidebarMenuItem className="mt-8">
                   <SidebarMenuButton asChild>
-                    <NavLink to={"/auth"}>
-                      {({ isActive }) => (
-                        <span className="flex items-center w-full gap-1">
-                          <Router />
-                          <span>Auth</span>
-                          {isActive ? (
-                            <ArrowLeft size={16} className="ml-auto" />
-                          ) : null}
-                        </span>
-                      )}
+                    <NavLink to={"/auth"} className={"glow-on-hover"}>
+                      Log in
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -133,7 +164,6 @@ export function AppSidebar() {
                 <Button
                   className="flex"
                   onClick={async () => {
-                    console.log("first");
                     await LogOut();
                     refreshSession();
                   }}
