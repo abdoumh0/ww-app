@@ -1,13 +1,13 @@
-import Calc from "./Calc";
 import { Input } from "@/components/ui/input";
-import ItemList from "./ItemList";
 import { useStore } from "@/lib/StoreContext";
 import { useEffect, useRef, useState } from "react";
 import type { ItemAttributes } from "../../../electron/database";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
-import PurchaseHistory from "./PurchaseHistory";
 import { toast } from "sonner";
+import PurchaseHistory from "./PurchaseHistory";
+import ItemList from "./ItemList";
+import Calc from "./Calc";
 
 type Props = {};
 
@@ -44,19 +44,21 @@ export default function POS({}: Props) {
         <div className="flex-1 flex flex-col justify-evenly">
           <Button
             onClick={async () => {
-              const purchase = await window.electronAPI.invoke(
-                "purchase:create",
-                scannedItems
-              );
-              if (purchase) {
-                purchaseHistoryDispatch({ type: "ADD", payload: [purchase] });
-                scannedItemsDispatch({
-                  type: "NUKE",
-                  payload: scannedItems.at(0)!.attributes, //doesnt matter if undefined, payload is unused on NUKE
-                });
-                return;
+              if (scannedItems.length > 0) {
+                const purchase = await window.electronAPI.invoke(
+                  "purchase:create",
+                  scannedItems
+                );
+                if (purchase) {
+                  purchaseHistoryDispatch({ type: "ADD", payload: [purchase] });
+                  scannedItemsDispatch({
+                    type: "NUKE",
+                    payload: scannedItems.at(0)!.attributes, //doesnt matter if undefined, payload is unused on NUKE
+                  });
+                  return;
+                }
+                toast("something went wrong");
               }
-              toast("something went wrong");
             }}
             className="border border-border bg-accent h-20 text-white hover:bg-green-600"
           >

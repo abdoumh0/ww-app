@@ -53,11 +53,13 @@ export default function Calc({}: Props) {
     } else if (e.key === "=" || e.key === "Enter") {
       try {
         const res = Parser.evaluate(opRef.current);
-        scannedItemsDispatch({
-          type: "ADD",
-          payload: { code: "", name: "<unnamed>", price: res },
-        });
-        setOp("");
+        if (res > 0) {
+          scannedItemsDispatch({
+            type: "ADD",
+            payload: { code: "", name: "<unnamed>", price: res },
+          });
+          setOp("");
+        }
       } catch (error) {
         setOp("err");
         if (timeoutRef.current) {
@@ -110,7 +112,7 @@ export default function Calc({}: Props) {
                     key={j}
                     variant={"secondary"}
                     className={`${
-                      cell == "=" ? "bg-amber-700" : ""
+                      cell == "=" ? "bg-amber-700 hover:bg-amber-600" : ""
                     } w-16 h-17 rounded-none border border-border`}
                     onMouseDown={() => {
                       if (isOp(cell) || cell === "=") {

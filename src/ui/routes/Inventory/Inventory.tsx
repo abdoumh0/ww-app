@@ -327,7 +327,7 @@ function InventoryPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="h-full bg-background p-6 overflow-scroll">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">

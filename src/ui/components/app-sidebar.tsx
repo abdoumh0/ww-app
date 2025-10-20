@@ -57,14 +57,14 @@ const authItems = [
     icon: <MailIcon />,
   },
   {
-    title: "Orders",
-    url: "/orders",
-    icon: <Package />,
-  },
-  {
     title: "Browse",
     url: "/browse",
     icon: <Search />,
+  },
+  {
+    title: "Orders",
+    url: "/orders",
+    icon: <Package />,
   },
   {
     title: "Agent",

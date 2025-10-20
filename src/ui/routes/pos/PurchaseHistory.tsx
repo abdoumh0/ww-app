@@ -56,8 +56,8 @@ function PurchaseHistoryItem({
 
   return (
     <Dialog>
-      <DialogTrigger>
-        <div>
+      <DialogTrigger asChild>
+        <div className="my-1 bg-background px-2 rounded-2xl text-sm py-1 cursor-pointer hover:underline underline-offset-2">
           <span className="flex justify-between px-0.5">
             <span className="font-bold">#{id}</span>
             <span>{total} DZD</span>

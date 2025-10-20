@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 import { HashRouter, Navigate, Route, Routes } from "react-router";
 import "./index.css";
 import App from "./App.tsx";
-import POS from "./routes/POS/POS.tsx";
 import { ThemeProvider } from "@/components/theme-provider";
 import Layout from "./layout.tsx";
 import { SidebarProvider } from "./components/ui/sidebar.tsx";
@@ -14,6 +13,8 @@ import AuthPage from "./routes/Auth/AuthPage.tsx";
 import { SessionProvider } from "./lib/SessionContext.tsx";
 import { WebSocketProvider } from "./lib/WebsocketContext.tsx";
 import MessageProvider from "./lib/MessageContext.tsx";
+import POS from "./routes/pos/Pos.tsx";
+import Messages from "./routes/Messages/Messages.tsx";
 
 export default App;
 
@@ -32,6 +33,7 @@ createRoot(document.getElementById("root")!).render(
                       <Route path="pos" element={<POS />} />
                       <Route path="inventory" element={<Inventory />} />
                       <Route path="auth" element={<AuthPage />} />
+                      <Route path="messages" element={<Messages />} />
 
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Route>
