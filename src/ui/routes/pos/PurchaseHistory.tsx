@@ -37,7 +37,7 @@ export default function PurchaseHistory({}: Props) {
         <div className="mx-auto w-fit opacity-15">no purchases yet</div>
       )}
       {purchaseHistory.map((purchase) => {
-        return <PurchaseHistoryItem {...purchase} />;
+        return <PurchaseHistoryItem key={purchase.id} {...purchase} />;
       })}
     </div>
   );

@@ -45,7 +45,7 @@ export default function ChatBox({}: Props) {
   return (
     <div className="flex-2 flex flex-col pb-3 h-full">
       <div className="w-full flex-1 flex flex-col px-1.5 min-h-0">
-        <span className="flex justify-between bg-accent rounded-sm px-2 py-1 my-1 ">
+        <span className="flex justify-between bg-accent rounded-sm px-2 py-1 my-1 min-h-[32px] ">
           <h1>
             {currentChat?.Type === "DM"
               ? currentChat?.Members.find(
@@ -113,7 +113,7 @@ function ChatBubble({
   return (
     <div
       className={`${
-        isCurrentUser ? "ml-auto bg-chart-1" : "bg-accent"
+        isCurrentUser ? "ml-auto bg-blue-600 text-white" : "bg-accent"
       } w-fit my-0.5 px-2 py-1.5 rounded-2xl min-w-8 text-center`}
     >
       {MessageContent.at(0)?.Text}

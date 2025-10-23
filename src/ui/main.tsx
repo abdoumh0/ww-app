@@ -3,47 +3,32 @@ import { createRoot } from "react-dom/client";
 import { HashRouter, Navigate, Route, Routes } from "react-router";
 import "./index.css";
 import App from "./App.tsx";
-import { ThemeProvider } from "@/components/theme-provider";
 import Layout from "./layout.tsx";
-import { SidebarProvider } from "./components/ui/sidebar.tsx";
-import StoreProvider from "./lib/StoreContext.tsx";
 import "@fontsource/dseg7-classic/700.css";
 import Inventory from "./routes/Inventory/Inventory.tsx";
 import AuthPage from "./routes/Auth/AuthPage.tsx";
-import { SessionProvider } from "./lib/SessionContext.tsx";
-import { WebSocketProvider } from "./lib/WebsocketContext.tsx";
-import MessageProvider from "./lib/MessageContext.tsx";
 import POS from "./routes/pos/Pos.tsx";
 import Messages from "./routes/Messages/Messages.tsx";
-
-export default App;
+import User from "./routes/Users/User.tsx";
+import Providers from "./Providers.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <SessionProvider>
-        <StoreProvider>
-          <MessageProvider>
-            <WebSocketProvider>
-              <SidebarProvider>
-                <HashRouter>
-                  <Routes>
-                    <Route element={<Layout />}>
-                      <Route index element={<App />} />
-                      <Route path="pos" element={<POS />} />
-                      <Route path="inventory" element={<Inventory />} />
-                      <Route path="auth" element={<AuthPage />} />
-                      <Route path="messages" element={<Messages />} />
+    <Providers>
+      <HashRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<App />} />
+            <Route path="pos" element={<POS />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="auth" element={<AuthPage />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="users/:username" element={<User />} />
 
-                      <Route path="*" element={<Navigate to="/" replace />} />
-                    </Route>
-                  </Routes>
-                </HashRouter>
-              </SidebarProvider>
-            </WebSocketProvider>
-          </MessageProvider>
-        </StoreProvider>
-      </SessionProvider>
-    </ThemeProvider>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </HashRouter>
+    </Providers>
   </StrictMode>
 );

@@ -5,6 +5,7 @@ import { AppSidebar } from "./components/app-sidebar";
 import { Toaster } from "sonner";
 import { useWebSocket } from "./lib/WebsocketContext";
 import { Wifi, WifiOff, WifiSync } from "lucide-react";
+import { Input } from "./components/ui/input";
 
 export default function Layout() {
   const { status } = useWebSocket();
@@ -16,6 +17,7 @@ export default function Layout() {
           size={"icon"}
           className="bg-background size-10"
         />
+        <Input type="text" placeholder="Search" className="mx-24" />
         <span className="flex items-center gap-x-2.5">
           {status === "CONNECTED" ? (
             <Wifi />

@@ -1,5 +1,6 @@
 import ChatBox from "./ChatBox";
 import Chats from "./Chats";
+import People from "./People";
 
 type Props = {};
 
@@ -8,7 +9,7 @@ export default function Messages({}: Props) {
     <div className="flex h-full">
       <Chats />
       <ChatBox />
-      <div className="flex-1">people</div>
+      <People />
     </div>
   );
 }

@@ -45,7 +45,9 @@ export default function Chats({}: Props) {
 
   return (
     <div className="flex-1 flex flex-col px-2 overflow-scroll">
-      <span className="bg-chart-4 text-sm my-1 px-2 rounded-sm">Chats:</span>
+      <span className="bg-chart-4 text-xs text-white my-1 px-2 rounded-sm">
+        Chats:
+      </span>
       {ChatStore.map((chat) => (
         <ChatPreview key={chat.ChatID} {...chat} />
       ))}

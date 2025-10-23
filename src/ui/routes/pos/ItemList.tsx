@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/StoreContext";
-import { Barcode, Minus, Plus, X } from "lucide-react";
+import { Barcode, Minus, Plus, ScanBarcode, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -149,10 +149,9 @@ export default function ItemList({}: Props) {
 function EmptyList({ active }: { active?: boolean }) {
   return (
     <div className="opacity-10 h-full flex flex-col justify-center items-center ">
-      <span className="text-4xl">
-        {active ? "scan items" : "click here to start scannig"}
+      <span className="text-4xl text-center">
+        {active ? <ScanBarcode size={80} /> : <Barcode size={80} />}
       </span>
-      <Barcode size={40} />
     </div>
   );
 }
