@@ -9,7 +9,6 @@ export interface User {
   Email: string;
   FirstName: string;
   LastName: string;
-  Password: Uint8Array;
   Type: string;
   Username: string | null;
   FacebookID: string | null;
@@ -28,7 +27,7 @@ export default function People({}: Props) {
     setIsLoading(true);
     setSuccess(true);
     try {
-      const res = await fetch("http://localhost:3000/api/users/get");
+      const res = await fetch("http://localhost:3000/api/users");
       const { users } = (await res.json()) as { users: User[] };
       setPeople(users);
       setIsLoading(false);

@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { Filters, ItemSkeleton } from "./User";
 
 type Props = {};
 
@@ -27,9 +28,14 @@ export default function ProfileSkeleton({}: Props) {
       <div className="max-w-7xl bg-background mx-auto px-4 sm:px-6 lg:px-8 py-8 text-accent-foreground/80">
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">Available Items</h2>
-          <p>Browse items from this seller's inventory</p>
+          <Filters />
         </div>
-
+        <div className="flex gap-1 flex-wrap justify-center">
+          <ItemSkeleton />
+          <ItemSkeleton />
+          <ItemSkeleton />
+          <ItemSkeleton />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
     </div>

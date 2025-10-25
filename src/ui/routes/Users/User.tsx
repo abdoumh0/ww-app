@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import type { AccountInfo } from "../../../../types";
-import Skeleton from "./Skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import UserNotFound from "./UserNotFound";
 import {
+  Loader2,
   Mail,
   MapPin,
   MessageCircle,
+  Minus,
   Package,
+  Plus,
   ShoppingCart,
 } from "lucide-react";
 import { useSession } from "@/lib/SessionContext";
@@ -16,14 +19,27 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import ProfileSkeleton from "./Skeleton";
+import { useStore } from "@/lib/StoreContext";
+import { Input } from "@/components/ui/input";
+import { set } from "lodash";
+import { toast } from "sonner";
 
 type Props = {};
 type User = AccountInfo;
-type UserItem = {
+export type UserItem = {
   Items: {
     Type: string;
     ItemID: string;
@@ -79,7 +95,7 @@ export default function User({}: Props) {
     return <UserNotFound />;
   }
   return isLoading ? (
-    <Skeleton />
+    <ProfileSkeleton />
   ) : (
     User && <ProfileP {...User} Items={Items} />
   );
@@ -135,46 +151,172 @@ AccountInfo & { Items: UserItem[] }) {
             {session && (
               <div className="flex gap-3">
                 <MessageModal />
-                <OrderModal />
+                <OrderModal username={Username!} />
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl bg-background mx-auto px-4 sm:px-6 lg:px-8 py-8 text-accent-foreground/80">
+      <div className="max-w-7xl bg-background mx-auto px-4 sm:px-6 lg:px-8 py-3 text-accent-foreground/80">
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">Available Items</h2>
-          <p>Browse items from this seller's inventory</p>
+          <Filters />
         </div>
-        {Items.map((item) => (
-          <Item key={item.ItemID.toString()} {...item} />
-        ))}
+        <div className="flex gap-1 flex-wrap">
+          {Items.map((item) => (
+            <Item key={item.ItemID.toString()} {...item} Username={Username!} />
+          ))}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
     </div>
   );
 }
 
-function OrderModal() {
+export function Filters() {
+  return (
+    <div className="w-full mx-auto bg-accent p-1.5 rounded-sm flex gap-2 mb-6">
+      <Select>
+        <SelectTrigger className="w-[180px] ">
+          <SelectValue placeholder="Select Category" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Category 1</SelectItem>
+          <SelectItem value="2">Category 2</SelectItem>
+          <SelectItem value="3">Category 3</SelectItem>
+        </SelectContent>
+      </Select>
+      <input
+        type="text"
+        className="w-full px-2.5 text-sm bg-background rounded-sm placeholder:text-center"
+        placeholder="name"
+      />
+      <div className="flex ml-auto gap-x-1">
+        <input
+          type="number"
+          className="bg-background rounded-sm px-2.5 text-sm w-28 placeholder:text-center [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          placeholder="min price"
+        />
+        <input
+          type="number"
+          className="bg-background rounded-sm px-2.5 text-sm w-28 placeholder:text-center [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          placeholder="max price"
+        />
+      </div>
+    </div>
+  );
+}
+
+function OrderModal({ username }: { username: string }) {
+  const { cart } = useStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const { cartDispatch } = useStore();
+  const cartItems = cart.get(username);
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant={"default"}>
           <ShoppingCart className="w-5 h-5" />
-          <span>Create Order</span>
+          <span>Make Order</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </DialogDescription>
+          <DialogTitle>Order from @{username}</DialogTitle>
+          <input
+            type="text"
+            name="orderNote"
+            id=""
+            className="my-1 bg-accent py-0.5 px-2 text-sm rounded-sm"
+          />
+          <DialogDescription>cart items</DialogDescription>
+          {cartItems ? (
+            <div>
+              {cartItems.map((item) => (
+                <CartItem
+                  key={item.attributes.ItemID}
+                  item={item}
+                  username={username}
+                />
+              ))}
+            </div>
+          ) : (
+            <div>No items in cart</div>
+          )}
         </DialogHeader>
+        <DialogFooter>
+          {cartItems && cartItems.length > 0 ? (
+            <Button
+              type="submit"
+              className="w-24 flex justify-center"
+              onClick={async () => {
+                try {
+                  setIsLoading(true);
+                  const res = await fetch(
+                    `http://localhost:3000/api/orders/create`,
+                    {
+                      method: "POST",
+                      body: JSON.stringify({
+                        owner: username,
+                        items: cartItems.map((item) => ({
+                          id: item.attributes.ItemID,
+                          qty: item.qty,
+                        })),
+                      }),
+                    }
+                  );
+                  const { success } = await res.json();
+                  if (success) {
+                    cartDispatch({
+                      type: "CLEAR_CART",
+                      payload: { owner: username },
+                    });
+                  }
+                  setIsLoading(false);
+                  toast("Order placed successfully");
+                } catch (error) {
+                  console.error(error);
+                  setIsLoading(false);
+                }
+              }}
+            >
+              {isLoading ? <Loader2 className="animate-spin" /> : "Place Order"}
+            </Button>
+          ) : null}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function CartItem({
+  item,
+  username,
+}: {
+  item: { attributes: UserItem; qty: number };
+  username: string;
+}) {
+  const { cartDispatch } = useStore();
+  return (
+    <div className="flex justify-between">
+      <div>{item.attributes.Items.Name}</div>
+      <div>{item.qty}</div>
+      <div>{parseFloat(item.attributes.Price) * item.qty} DZD</div>
+      <button
+        onClick={() => {
+          cartDispatch({
+            type: "REMOVE_FROM_CART",
+            payload: {
+              owner: username,
+              item: item.attributes,
+            },
+          });
+        }}
+      >
+        <Minus className="w-4 h-4" />
+      </button>
+    </div>
   );
 }
 
@@ -184,7 +326,7 @@ function MessageModal() {
       <DialogTrigger asChild>
         <Button variant={"outline"}>
           <MessageCircle className="w-5 h-5" />
-          <span>Send Message</span>
+          <span>Message</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -199,15 +341,47 @@ function MessageModal() {
   );
 }
 
-function Item({ Items, Price, Qty, ImageLink }: UserItem) {
+function Item(itemData: UserItem & { Username: string }) {
+  const { Items, Price, ImageLink, ItemID, Username } = itemData;
   const { Name, Type, Brand, CategoryID } = Items;
+  const { cartDispatch } = useStore();
   return (
-    <div className="bg-accent p-4 rounded-lg flex flex-col items-center">
-      <div>{Name}</div>
-      <div>{Type}</div>
-      <div>{Brand}</div>
-      <div>{CategoryID}</div>
-      <img src={ImageLink} alt={Name} className="w-full h-auto rounded-lg" />
+    <div className="bg-accent w-fit h-fit rounded-sm overflow-hidden flex flex-col relative">
+      <div className="aspect-[16/9] w-52 h-28 overflow-hidden">
+        <img
+          src={ImageLink}
+          alt={Name}
+          className="w-full h-full object-cover object-center"
+        />
+      </div>
+      <div className="absolute text-white top-0 left-0 mx-2 px-2 py-0.5 my-1 rounded-2xl bg-black/60">
+        {Price} DZD
+      </div>
+      <button
+        onClick={(e) => {
+          cartDispatch({
+            type: "ADD_TO_CART",
+            payload: { owner: Username, item: itemData },
+          });
+        }}
+        className="absolute top-0 right-0 mx-2 my-1 bg-black/60 px-2 py-2 rounded-full text-white hover:bg-black/80 transition active:bg-black"
+      >
+        <Plus className="size-3" />
+      </button>
+      <div className="flex px-2 py-1">
+        <div className="">{Name}</div>
+        <div>{Brand}</div>
+      </div>
     </div>
+  );
+}
+
+export function ItemSkeleton() {
+  return (
+    <Skeleton className=" w-fit h-fit rounded-sm overflow-hidden flex flex-col ">
+      <Skeleton className="aspect-[16/9] w-52 h-28 overflow-hidden"></Skeleton>
+
+      <Skeleton className="flex px-2 h-8 py-1"></Skeleton>
+    </Skeleton>
   );
 }

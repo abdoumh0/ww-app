@@ -4,6 +4,7 @@ import type {
   PurchaseAttributes,
 } from "../../electron/database";
 import { sortBy, uniqBy } from "lodash";
+import type { UserItem } from "@/routes/Users/User";
 
 type Props = {
   children?: React.ReactNode;
@@ -28,6 +29,15 @@ type StoreContextType = {
       action: {
         type: purchaseHistoryActions;
         payload: PurchaseAttributes[];
+      }
+    ]
+  >;
+  cart: Cart;
+  cartDispatch: React.ActionDispatch<
+    [
+      action: {
+        type: cartActions;
+        payload: { owner: string; item?: UserItem };
       }
     ]
   >;
@@ -102,6 +112,7 @@ function scannedItemsReducer(
       return state;
   }
 }
+
 type purchaseHistoryActions = "ADD";
 function purchaseHistoryReducer(
   state: PurchaseAttributes[],
@@ -118,6 +129,75 @@ function purchaseHistoryReducer(
       return state;
   }
 }
+type Cart = Map<string, { attributes: UserItem; qty: number }[]>;
+type cartActions = "ADD_TO_CART" | "REMOVE_FROM_CART" | "CLEAR_CART";
+function CartReducer(
+  state: Cart,
+  action: {
+    type: cartActions;
+    payload: { owner: string; item?: UserItem };
+  }
+) {
+  switch (action.type) {
+    case "ADD_TO_CART":
+      if (!action.payload.item) {
+        return state;
+      }
+      const { ItemID } = action.payload.item.Items;
+      if (!ItemID) return state;
+      let newState = new Map(state);
+      let cart = newState.get(action.payload.owner);
+      if (!cart) {
+        newState.set(action.payload.owner, [
+          { attributes: action.payload.item, qty: 1 },
+        ]);
+        return newState;
+      }
+      let exists = false;
+      cart.forEach((i) => {
+        if (i.attributes.Items.ItemID === ItemID) {
+          i.qty += 1;
+          exists = true;
+        }
+      });
+      if (!exists) {
+        cart.push({ attributes: action.payload.item, qty: 1 });
+      }
+      newState.set(action.payload.owner, cart);
+      return newState;
+
+    case "REMOVE_FROM_CART":
+      if (!action.payload.item) {
+        return state;
+      }
+      let newState_ = new Map(state);
+      let cart2 = newState_.get(action.payload.owner);
+      if (!cart2) return newState_;
+      let item = cart2.find(
+        (i) => i.attributes.Items.ItemID === action.payload.item!.Items.ItemID
+      );
+      if (item) {
+        if (item.qty > 1) {
+          console.log("sec");
+          item.qty -= 1;
+          newState_.set(action.payload.owner, cart2);
+        } else {
+          const filtered = cart2.filter(
+            (i) =>
+              i.attributes.Items.ItemID !== action.payload.item!.Items.ItemID
+          );
+          newState_.set(action.payload.owner, filtered);
+        }
+      }
+      return newState_;
+    case "CLEAR_CART":
+      let clearedState = new Map(state);
+      clearedState.delete(action.payload.owner);
+      return clearedState;
+    default:
+      return state;
+  }
+}
 
 export default function StoreProvider({ children }: Props) {
   const [scannedItems, scannedItemsDispatch] = useReducer(
@@ -130,6 +210,11 @@ export default function StoreProvider({ children }: Props) {
     []
   );
 
+  const [cart, cartDispatch] = useReducer(
+    CartReducer,
+    new Map<string, { attributes: UserItem; qty: number }[]>()
+  );
+
   return (
     <StoreContext.Provider
       value={{
@@ -137,6 +222,8 @@ export default function StoreProvider({ children }: Props) {
         scannedItemsDispatch,
         purchaseHistory,
         purchaseHistoryDispatch,
+        cart,
+        cartDispatch,
       }}
     >
       {children}

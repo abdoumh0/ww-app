@@ -95,9 +95,12 @@ export const WebSocketProvider = ({
 
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data) as WS_Notification;
-      console.log("Received:", msg.chat_object);
+      if (msg.type == "ORDER_EVENT") {
+        console.log("check orders");
+      }
       if (!msg.chat_object) return;
       else {
+        console.log("Received:", msg.chat_object);
         const chat = msg.chat_object;
         let c: ChatType = {
           ChatID: chat.chat_id,
@@ -135,7 +138,6 @@ export const WebSocketProvider = ({
         });
       }
     };
-
     socketRef.current = ws;
 
     return () => {
