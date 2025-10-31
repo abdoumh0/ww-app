@@ -48,7 +48,7 @@ export default function Chats({}: Props) {
       <span className="bg-chart-4 text-xs text-white my-1 px-2 rounded-sm">
         Chats:
       </span>
-      {ChatStore.map((chat) => (
+      {ChatStore.filter((chat) => chat.Messages.length > 0).map((chat) => (
         <ChatPreview key={chat.ChatID} {...chat} />
       ))}
       {isLoading && <Loader2 className="animate-spin w-fit mx-auto size-4" />}

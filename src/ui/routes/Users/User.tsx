@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import type { AccountInfo } from "../../../../types";
 import { Skeleton } from "@/components/ui/skeleton";
-import UserNotFound from "./UserNotFound";
 import {
   Loader2,
   Mail,
@@ -33,8 +32,6 @@ import {
 } from "@/components/ui/select";
 import ProfileSkeleton from "./Skeleton";
 import { useStore } from "@/lib/StoreContext";
-import { Input } from "@/components/ui/input";
-import { set } from "lodash";
 import { toast } from "sonner";
 
 type Props = {};
@@ -96,9 +93,13 @@ export default function User({}: Props) {
   ) : (
     User && <ProfileP {...User} Items={Items} />
   );
-  // : (
-  //   <UserNotFound />
-  // );
+}
+
+interface DM {
+  Type: string;
+  ChatID: string;
+  Name: string;
+  lastMessageAt: Date;
 }
 
 function ProfileP({
@@ -110,6 +111,8 @@ function ProfileP({
 }: // WorkArea,
 AccountInfo & { Items: UserItem[] }) {
   const { session } = useSession();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   // const formatPrice = (price: number) => {
   //   return `$${(price / 100).toFixed(2)}`;
@@ -150,7 +153,61 @@ AccountInfo & { Items: UserItem[] }) {
             </div>
             {session && (
               <div className="flex gap-3">
-                <MessageModal />
+                <Button
+                  variant={"outline"}
+                  className="w-28"
+                  onClick={async () => {
+                    setIsLoading(true);
+                    try {
+                      const res1 = await fetch(
+                        "http://localhost:3000/api/chats/get_dm?target=" +
+                          Username,
+                        { credentials: "include" }
+                      );
+                      const { data } = (await res1.json()) as {
+                        ok: boolean;
+                        data: DM | undefined;
+                      };
+                      if (data) {
+                        navigate("/messages?chat_id=" + data.ChatID);
+                        return;
+                      }
+                      const res2 = await fetch(
+                        "http://localhost:3000/api/chats/create",
+                        {
+                          method: "POST",
+                          credentials: "include",
+                          body: JSON.stringify({
+                            type: "DM",
+                            members: [Username, session.user.Username],
+                          }),
+                        }
+                      );
+                      const { ok, newChat } = (await res2.json()) as {
+                        ok: boolean;
+                        newChat: DM;
+                      };
+                      if (ok) {
+                        navigate("/messages?chat_id=" + newChat.ChatID);
+                        return;
+                      }
+                      setIsLoading(false);
+                    } catch (error) {
+                      toast.error("failed to get DM");
+                      console.log(error);
+                      setIsLoading(false);
+                    }
+                  }}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <MessageCircle className="w-5 h-5" />
+                      <span>Message</span>
+                    </>
+                  )}
+                </Button>
                 <OrderModal username={Username!} />
               </div>
             )}
@@ -339,27 +396,6 @@ function CartItem({
   );
 }
 
-function MessageModal() {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant={"outline"}>
-          <MessageCircle className="w-5 h-5" />
-          <span>Message</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Send a Message</DialogTitle>
-          <DialogDescription>
-            This action will send a message to the user.
-          </DialogDescription>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 function Item(itemData: UserItem & { Username: string }) {
   const { Items, Price, ImageLink, ItemID, Username } = itemData;
   const { Name, Type, Brand, CategoryID } = Items;
@@ -377,7 +413,7 @@ function Item(itemData: UserItem & { Username: string }) {
         {Price} DZD
       </div>
       <button
-        onClick={(e) => {
+        onClick={() => {
           cartDispatch({
             type: "ADD_TO_CART",
             payload: { owner: Username, item: itemData },

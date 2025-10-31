@@ -100,8 +100,10 @@ export const WebSocketProvider = ({
 
         return;
       }
-      if (!msg.chat_object) return;
-      else {
+      if (!msg.chat_object) {
+        console.log("no message object");
+        return;
+      } else {
         console.log("Received:", msg.chat_object);
         const chat = msg.chat_object;
         let c: ChatType = {
