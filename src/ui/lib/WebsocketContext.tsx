@@ -93,10 +93,12 @@ export const WebSocketProvider = ({
       console.error("WS error:", err);
     };
 
-    ws.onmessage = (event) => {
+    ws.onmessage = async (event) => {
       const msg = JSON.parse(event.data) as WS_Notification;
       if (msg.type == "ORDER_EVENT") {
-        console.log("check orders");
+        console.log("orders");
+
+        return;
       }
       if (!msg.chat_object) return;
       else {

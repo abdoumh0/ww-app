@@ -91,14 +91,14 @@ export default function User({}: Props) {
   useEffect(() => {
     getUser();
   }, []);
-  if (!isLoading && !User) {
-    return <UserNotFound />;
-  }
   return isLoading ? (
     <ProfileSkeleton />
   ) : (
     User && <ProfileP {...User} Items={Items} />
   );
+  // : (
+  //   <UserNotFound />
+  // );
 }
 
 function ProfileP({
@@ -257,6 +257,7 @@ function OrderModal({ username }: { username: string }) {
                     `http://localhost:3000/api/orders/create`,
                     {
                       method: "POST",
+                      credentials: "include",
                       body: JSON.stringify({
                         owner: username,
                         items: cartItems.map((item) => ({
@@ -267,14 +268,17 @@ function OrderModal({ username }: { username: string }) {
                     }
                   );
                   const { success } = await res.json();
+                  console.log(success);
                   if (success) {
                     cartDispatch({
                       type: "CLEAR_CART",
                       payload: { owner: username },
                     });
+                    toast.success("Order placed successfully");
+                  } else {
+                    toast.error("Failed to place order");
                   }
                   setIsLoading(false);
-                  toast("Order placed successfully");
                 } catch (error) {
                   console.error(error);
                   setIsLoading(false);
@@ -303,19 +307,34 @@ function CartItem({
       <div>{item.attributes.Items.Name}</div>
       <div>{item.qty}</div>
       <div>{parseFloat(item.attributes.Price) * item.qty} DZD</div>
-      <button
-        onClick={() => {
-          cartDispatch({
-            type: "REMOVE_FROM_CART",
-            payload: {
-              owner: username,
-              item: item.attributes,
-            },
-          });
-        }}
-      >
-        <Minus className="w-4 h-4" />
-      </button>
+      <span className="space-x-3">
+        <button
+          onClick={() => {
+            cartDispatch({
+              type: "ADD_TO_CART",
+              payload: {
+                owner: username,
+                item: item.attributes,
+              },
+            });
+          }}
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => {
+            cartDispatch({
+              type: "REMOVE_FROM_CART",
+              payload: {
+                owner: username,
+                item: item.attributes,
+              },
+            });
+          }}
+        >
+          <Minus className="w-4 h-4" />
+        </button>
+      </span>
     </div>
   );
 }

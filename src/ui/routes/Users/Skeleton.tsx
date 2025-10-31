@@ -25,12 +25,12 @@ export default function ProfileSkeleton({}: Props) {
         </div>
       </div>
 
-      <div className="max-w-7xl bg-background mx-auto px-4 sm:px-6 lg:px-8 py-8 text-accent-foreground/80">
+      <div className="max-w-7xl bg-background mx-auto px-4 sm:px-6 lg:px-8 py-3 text-accent-foreground/80">
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">Available Items</h2>
           <Filters />
         </div>
-        <div className="flex gap-1 flex-wrap justify-center">
+        <div className="flex gap-1 flex-wrap">
           <ItemSkeleton />
           <ItemSkeleton />
           <ItemSkeleton />

@@ -84,7 +84,8 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <span className="flex justify-end pt-0.5  items-center">
+        <span className="flex justify-between pt-0.5  items-center">
+          <span>{session?.user.Username}</span>
           <Button
             size={"icon-sm"}
             variant={"ghost"}
