@@ -5,7 +5,7 @@ type Props = {};
 
 export default function ProfileSkeleton({}: Props) {
   return (
-    <div className="min-h-0 bg-gradient-to-br from-background to-accent">
+    <div className="min-h-0 bg-background">
       <div className="bg-background shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">

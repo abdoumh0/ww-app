@@ -1,6 +1,9 @@
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/SessionContext";
+import { Loader2, MessageCircle, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 type Props = {};
 
@@ -21,7 +24,6 @@ export default function People({}: Props) {
   const [people, setPeople] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(true);
-  const navigate = useNavigate();
 
   async function getPeople() {
     setIsLoading(true);
@@ -48,22 +50,7 @@ export default function People({}: Props) {
         People near you:
       </span>
       {people.map((person) => {
-        return (
-          <div
-            key={person.AccountID}
-            className="px-2 py-1 rounded-sm bg-accent my-0.5 cursor-pointer hover:brightness-105 active:brightness-95"
-            onClick={() => {
-              navigate(`/users/${person.Username}`);
-            }}
-          >
-            <div>
-              {person.FirstName} {person.LastName}
-            </div>
-            <div className="italic text-xs text-gray-500">
-              @{person.Username}
-            </div>
-          </div>
-        );
+        return <UserPreview key={person.AccountID} {...person} />;
       })}
       {isLoading && <Loader2 className="animate-spin w-fit mx-auto size-4" />}
       {!success && (
@@ -79,6 +66,92 @@ export default function People({}: Props) {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+interface DM {
+  Type: string;
+  ChatID: string;
+  Name: string;
+  lastMessageAt: Date;
+}
+
+function UserPreview({ FirstName, LastName, Username }: User) {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const { session } = useSession();
+  return (
+    <div className="flex justify-between items-center align-middle px-2 py-1 rounded-sm bg-accent my-0.5">
+      <div>
+        {FirstName} {LastName}
+        <div className="italic text-xs text-gray-500">@{Username}</div>
+      </div>
+      <div className="flex gap-x-1.5">
+        <Button
+          variant={"outline"}
+          size={"sm"}
+          onClick={async () => {
+            setIsLoading(true);
+            try {
+              const res1 = await fetch(
+                "http://localhost:3000/api/chats/get_dm?target=" + Username,
+                { credentials: "include" }
+              );
+              const { data } = (await res1.json()) as {
+                ok: boolean;
+                data: DM | undefined;
+              };
+              if (data) {
+                setIsLoading(false);
+                navigate("/messages?chat_id=" + data.ChatID);
+                return;
+              }
+              const res2 = await fetch(
+                "http://localhost:3000/api/chats/create",
+                {
+                  method: "POST",
+                  credentials: "include",
+                  body: JSON.stringify({
+                    type: "DM",
+                    members: [Username, session?.user.Username],
+                  }),
+                }
+              );
+              const { ok, newChat } = (await res2.json()) as {
+                ok: boolean;
+                newChat: DM;
+              };
+              if (ok) {
+                setIsLoading(false);
+                navigate("/messages?chat_id=" + newChat.ChatID);
+                return;
+              }
+            } catch (error) {
+              toast.error("failed to get DM");
+              console.log(error);
+              setIsLoading(false);
+            }
+          }}
+        >
+          {isLoading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <>
+              <MessageCircle className="w-5 h-5" />
+            </>
+          )}
+        </Button>
+        <Button
+          variant={"outline"}
+          size={"sm"}
+          onClick={() => {
+            navigate("/users/" + Username);
+          }}
+        >
+          <User />
+        </Button>
+      </div>
     </div>
   );
 }

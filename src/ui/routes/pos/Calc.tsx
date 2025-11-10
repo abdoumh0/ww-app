@@ -40,6 +40,7 @@ function toOp(a: string) {
 export default function Calc({}: Props) {
   const [op, setOp] = useState<string>("");
   const { scannedItemsDispatch } = useStore();
+  const [focused, setFocused] = useState(false);
 
   const calcRef = useRef<HTMLDivElement | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -91,12 +92,14 @@ export default function Calc({}: Props) {
   return (
     <div
       ref={calcRef}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       tabIndex={1}
       className="group w-fit h-fit rounded-xs mt-1 border border-border overflow-hidden"
     >
       <div className="flex font-DSEG w-full overflow-x-clip text-right h-17  group-focus-within:bg-stone-400 bg-stone-900 text-stone-900 transition-colors text-sm">
         <div className="w-7 h-full font-mono font-bold text-xl items-center flex justify-center align-middle">
-          +
+          {focused && "+"}
         </div>
         <div className="text-lg flex flex-col h-full w-full justify-evenly overflow-x-hidden pr-1.5">
           <div>{op}</div>

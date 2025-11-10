@@ -11,6 +11,7 @@ import POS from "./routes/pos/Pos.tsx";
 import Messages from "./routes/Messages/Messages.tsx";
 import User from "./routes/Users/User.tsx";
 import Providers from "./Providers.tsx";
+import Browse from "./routes/Browse/Browse.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -24,6 +25,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="auth" element={<AuthPage />} />
             <Route path="messages" element={<Messages />} />
             <Route path="users/:username" element={<User />} />
+            <Route path="browse" element={<Browse />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

@@ -119,7 +119,7 @@ AccountInfo & { Items: UserItem[] }) {
   // };
 
   return (
-    <div className="min-h-0 bg-gradient-to-br from-background to-accent">
+    <div className="min-h-0 bg-background">
       <div className="bg-background shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
@@ -266,16 +266,25 @@ export function Filters() {
 }
 
 function OrderModal({ username }: { username: string }) {
-  const { cart } = useStore();
+  const { cart, cartDispatch } = useStore();
   const [isLoading, setIsLoading] = useState(false);
-  const { cartDispatch } = useStore();
+
   const cartItems = cart.get(username);
+  const cartItemCount = cartItems?.reduce((sum, item) => {
+    sum += item.qty;
+    return sum;
+  }, 0);
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={"default"}>
+        <Button variant={"default"} className="relative">
           <ShoppingCart className="w-5 h-5" />
           <span>Make Order</span>
+          {cartItemCount != undefined && cartItemCount > 0 && (
+            <div className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-4 h-4 rounded-full text-center">
+              {cartItemCount}
+            </div>
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent>
